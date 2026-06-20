@@ -18,7 +18,7 @@ def list_inputs():
     if not inputs:
         raise RuntimeError("No audio input device detected.")
     if default_index == -1:
-        raise RuntimeError("No audio output device detected")
+        raise RuntimeError("No audio output device detected.")
     return inputs, default_index
 
 def list_outputs():
@@ -37,9 +37,9 @@ def list_outputs():
     for index, name in outputs:
         print(f"  {index}: {name}")
     if not outputs:
-        raise RuntimeError("Aucun périphérique de sortie audio détecté.")
+        raise RuntimeError("No audio output device detected.")
     if default_index == -1:
-        raise RuntimeError("Aucun périphérique de sortie audio par défaut détecté.")
+        raise RuntimeError("No audio output device detected.")
     return outputs, default_index
 
 def record_audio(input_index,duration=5,samplerate=16000):
