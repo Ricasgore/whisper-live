@@ -1,46 +1,38 @@
 import sounddevice as sd
 
-def list_inputs():
-    devices = sd.query_devices()
-    inputs=[]
-    hostapis = sd.query_hostapis()
-    default_index = -1
-    for i,device in enumerate(devices):
-        if device['max_input_channels'] > 0 and hostapis[device['hostapi']]['name'] != 'Windows WDM-KS':
-            if sd.default.device[0] == i:
-                default_index=device['index']
-                inputs.append((device['index'], device['name'] + " (default)"))
-            else:
-                inputs.append((device['index'], device['name']))
-    print("Available audio input devices:")
-    for index, name in inputs:
-        print(f"  {index}: {name}")
-    if not inputs:
-        raise RuntimeError("No audio input device detected.")
-    if default_index == -1:
-        raise RuntimeError("No audio output device detected.")
-    return inputs, default_index
+def list_devices(mode):
+    if mode == "input":
+        channel_key = 'max_input_channels'
+        default_position = 0
+        label = "input"
+    elif mode == "output":
+        channel_key = 'max_output_channels'
+        default_position = 1
+        label = "output"
 
-def list_outputs():
     devices = sd.query_devices()
-    outputs=[]
     hostapis = sd.query_hostapis()
+    results = []
     default_index = -1
-    for i,device in enumerate(devices):
-        if device['max_output_channels'] > 0 and hostapis[device['hostapi']]['name'] != 'Windows WDM-KS':
-            if sd.default.device[1] == i:
-                default_index=device['index']
-                outputs.append((device['index'], device['name'] + " (default)"))
+
+    for i, device in enumerate(devices):
+        if device[channel_key] > 0 and hostapis[device['hostapi']]['name'] != 'Windows WDM-KS':
+            if sd.default.device[default_position] == i:
+                default_index = device['index']
+                results.append((device['index'], device['name'] + " (default)"))
             else:
-                outputs.append((device['index'], device['name']))
-    print("Available audio output devices:")
-    for index, name in outputs:
+                results.append((device['index'], device['name']))
+
+    print(f"Available audio {label} devices:")
+    for index, name in results:
         print(f"  {index}: {name}")
-    if not outputs:
-        raise RuntimeError("No audio output device detected.")
+
+    if not results:
+        raise RuntimeError(f"No audio {label} device detected.")
     if default_index == -1:
-        raise RuntimeError("No audio output device detected.")
-    return outputs, default_index
+        raise RuntimeError(f"No default audio {label} device detected.")
+
+    return results, default_index
 
 def record_audio(input_index,duration=5,samplerate=16000):
     frames = duration*samplerate
@@ -50,12 +42,13 @@ def record_audio(input_index,duration=5,samplerate=16000):
     print("End of recording")
     return audio
 
-list_inputs()
-list_outputs()
+if __name__ == "__main__":
+    list_devices("input")
+    input_index = int(input("Selected Audio Input Device: "))
 
-input_index = int(input("Selected Audio Input Device: "))
-output_index = int(input("Selected Audio Output Device: "))
+    list_devices("output")
+    output_index = int(input("Selected Audio Output Device: "))
 
-sd.play(data=record_audio(input_index),samplerate=16000,device=output_index)
-print("Listening to the recording")
-sd.wait()
+    sd.play(data=record_audio(input_index), samplerate=16000, device=output_index)
+    print("Listening to the recording")
+    sd.wait()
