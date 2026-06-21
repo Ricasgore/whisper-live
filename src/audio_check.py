@@ -23,9 +23,10 @@ def list_devices(mode):
             else:
                 results.append((device['index'], device['name']))
 
-    print(f"Available audio {label} devices:")
-    for index, name in results:
-        print(f"  {index}: {name}")
+    if __name__ == "__main__":
+        print(f"Available audio {label} devices:")
+        for index, name in results:
+            print(f"  {index}: {name}")
 
     if not results:
         raise RuntimeError(f"No audio {label} device detected.")
